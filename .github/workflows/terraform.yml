@@ -29,7 +29,6 @@ jobs:
 
     - name: login to az
       run: |
-        echo "$ARM_CLIENT_CERTIFICATE" > sfh-ms.pem
         az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant "$ARM_TENANT_ID"
         az account set --subscription $ARM_SUBSCRIPTION_ID 
 
