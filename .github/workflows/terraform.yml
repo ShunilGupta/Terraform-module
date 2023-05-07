@@ -6,16 +6,10 @@ on:
    
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
-  ARM_CLIENT_CERTIFICATE: ${{ secrets.AZURE_AD_CLIENT_CERTIFICATE }}
-  ARM_CLIENT_CERTIFICATE_PASSWORD: ${{ secrets.AZURE_AD_CLIENT_CERTIFICATE_PASSWORD }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
-  RG_FOR_TFSTATE: "jjj"
-  SA_FOR_TFSTATE: "utfstate"  # Do not change this value
-  CONTAINER_FOR_TFSTATE: "terraform" # Do not change this value
-  TF_STATE_ACCESSKEY1: ${{ secrets.TF_STATE_ACCESSKEY1 }} 
-  
-  
+    
 
 jobs:
   terraform:
@@ -36,7 +30,7 @@ jobs:
     - name: login to az
       run: |
         echo "$ARM_CLIENT_CERTIFICATE" > sfh-ms.pem
-        az login --service-principal -u $ARM_CLIENT_ID -p sfh-ms.pem --tenant "$ARM_TENANT_ID"
+        az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant "$ARM_TENANT_ID"
         az account set --subscription $ARM_SUBSCRIPTION_ID 
 
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
@@ -50,7 +44,7 @@ jobs:
     - name: Terraform Init
       id: init
       run: |
-        terraform init -upgrade -backend-config="access_key=${{ secrets.TF_STATE_ACCESSKEY1 }}" -backend-config="resource_group_name=${{ env.RG_FOR_TFSTATE }}" -backend-config="storage_account_name=${{ env.SA_FOR_TFSTATE }}" -backend-config="container_name=${{ env.CONTAINER_FOR_TFSTATE }}"
+        terraform init -upgrade
       working-directory: ./Iac
       shell: bash
 
@@ -65,7 +59,7 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: |
-        terraform plan -input=false -no-color -out tf.plan -var-file "terraform.sit.tfvars" -var="spn_client_id=${{ secrets.AZURE_AD_CLIENT_ID }}" -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" -var="client_certificate_password=${{ secrets.AZURE_AD_CLIENT_CERTIFICATE_PASSWORD }}" -var="tenant_id=${{ secrets.AZURE_AD_TENANT_ID }}"
+        terraform plan -input=false -no-color -out tf.plan -var="spn_client_id=${{ secrets.AZURE_AD_CLIENT_ID }}" -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" -var="client_secret=${{ secrets.AZURE_AD_CLIENT_SECRET }}" -var="tenant_id=${{ secrets.AZURE_AD_TENANT_ID }}"
       working-directory: ./Iac
       shell: bash
 
