@@ -24,3 +24,19 @@ variable "app_service_plan" {
  variable "storage_account_access_key"{
    type       = string
  }
+
+variable "subscription_id"{
+type = string
+}
+
+variable "client_secret"{
+type = string
+}
+
+variable "spn_client_id"{
+type = string
+}
+
+variable "tenant_id"{
+type = string
+}
